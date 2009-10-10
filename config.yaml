@@ -1,0 +1,14 @@
+site_name: ukropol
+site_tag_line: A twitter aggregator for Google AppEngine for Ukrainian politicians
+site_domain: ukropol.appspot.com
+
+twitter_username: user
+twitter_password: password
+
+users:
+- president_ua
+- bogoslovska
+- tigipko
+
+hashes:
+-   
