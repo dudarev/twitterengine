@@ -4,7 +4,7 @@ body,div,dl,dt,dd,ul,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blo
 
 /* El grid */
 body {text-align:center; background-color:#f4f4f4; font-family:'Lucida Grande',sans-serif; font-size:13px; color:#222; line-height:18px;}
-#container {width:893px; text-align:left; margin:0 auto; background: #ffffff url(lc.png) left top repeat-y;}
+#container {width:893px; text-align:left; margin:0 auto; background: #ffffff url(c.png) left top repeat-y;}
 #header {background:url('/resources/top.png') center left no-repeat #f4f4f4; height:154px; position:relative; margin-top:5px;}
 #header .feedicon {position:absolute; top:20px; right:20px;}
 #sidebar {float:right; width:220px; padding:20px 10px; background: url(rc.png) right top repeat-y; }
