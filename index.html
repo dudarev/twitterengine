@@ -10,10 +10,10 @@
     <div id="container">
       <div id="header"><a class="feedicon" href="/rss"><img src="/resources/feed.png" border="0"/></a></div>
       <div id="sidebar">
-        <h3>What?</h3>
-        <p>Lorem ipsum...</p>
-        <h3>Why?</h3>
-        <p>Lorem ipsum...</p>
+        <h3>Что это?</h3>
+        <p>Агрегатор твиттов украинских политиков и того, что им и о них пишут.</p>
+        <h3>Зачем?</h3>
+        <p>Это первый пробный проект в формате "codejam" под эгидой донецкого "<a href="http://groups.google.com/group/cnc-donetsk/">кофе-и-кода</a>".</p>
       </div>
       <div id="content">
         {% for tweet in tweets %}
@@ -39,12 +39,12 @@
         <table>
           <tr>
             <td width="50%" valign="top">
-              <h3>Hvem?</h3>
+              <h3>Кто твиттит?</h3>
               <div class="cloud">{% for c in cloud|dictsortreversed:"count"|slice:":40"|dictsort:"lower_name" %} {{ c.html }} {% endfor %}</div>
             </td>
             <td width="50%" valign="top">
-              <h3>How?</h3>
-              <p>More lorem ipsum</p>
+              <h3>Как?</h3>
+              <p>За основу взят <a href="http://github.com/steffentchr/twitterengine">код</a> аналогичного датского проекта <a href="http://www.folketwinget.dk/">http://www.folketwinget.dk/</a>. <a href="http://github.com/dudarev/twitterengine">Код изменений</a> тоже открыт.</p>
             </td>
           </tr>
         </table>
