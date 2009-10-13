@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #!/usr/bin/python
 #
 # Copyright 2007 Google Inc. All Rights Reserved.
@@ -157,7 +158,7 @@ class Status(object):
     Returns:
       A human readable string representing the posting time
     '''
-    fudge = 1.25
+    fudge = 1.6
     delta  = int(self.now) - int(self.created_at_in_seconds)
 
     if delta < (1 * fudge):
@@ -175,7 +176,7 @@ class Status(object):
     elif delta < (60 * 60 * 24 * fudge):
       return 'около дня назад'
     else:
-      return 'около %d дней назад' % (delta / (60 * 60 * 24))
+      return 'около %d дней назад' % round(delta / (60 * 60 * 24))
 
 #    if delta < (1 * fudge):
 #      return 'about a second ago'
