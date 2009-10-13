@@ -161,21 +161,38 @@ class Status(object):
     delta  = int(self.now) - int(self.created_at_in_seconds)
 
     if delta < (1 * fudge):
-      return 'about a second ago'
+      return 'около секунды назад'
     elif delta < (60 * (1/fudge)):
-      return 'about %d seconds ago' % (delta)
+      return 'около %d секунд назад' % (delta)
     elif delta < (60 * fudge):
-      return 'about a minute ago'
+      return 'около минуты назад'
     elif delta < (60 * 60 * (1/fudge)):
-      return 'about %d minutes ago' % (delta / 60)
+      return 'около %d минут назад' % (delta / 60)
     elif delta < (60 * 60 * fudge):
-      return 'about an hour ago'
+      return 'около часа назад'
     elif delta < (60 * 60 * 24 * (1/fudge)):
-      return 'about %d hours ago' % (delta / (60 * 60))
+      return 'около %d часов назад' % (delta / (60 * 60))
     elif delta < (60 * 60 * 24 * fudge):
-      return 'about a day ago'
+      return 'около дня назад'
     else:
-      return 'about %d days ago' % (delta / (60 * 60 * 24))
+      return 'около %d дней назад' % (delta / (60 * 60 * 24))
+
+#    if delta < (1 * fudge):
+#      return 'about a second ago'
+#    elif delta < (60 * (1/fudge)):
+#      return 'about %d seconds ago' % (delta)
+#    elif delta < (60 * fudge):
+#      return 'about a minute ago'
+#    elif delta < (60 * 60 * (1/fudge)):
+#      return 'about %d minutes ago' % (delta / 60)
+#    elif delta < (60 * 60 * fudge):
+#      return 'about an hour ago'
+#    elif delta < (60 * 60 * 24 * (1/fudge)):
+#      return 'about %d hours ago' % (delta / (60 * 60))
+#    elif delta < (60 * 60 * 24 * fudge):
+#      return 'about a day ago'
+#    else:
+#      return 'about %d days ago' % (delta / (60 * 60 * 24))
 #     if delta < (1 * fudge):
 #       return 'for nogle sekunder siden'
 #     elif delta < (60 * (1/fudge)):
