@@ -5,7 +5,7 @@ from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import template
 import twitter, os, random
 import re, htmlentitydefs
-import yaml  
+import yaml
 
 # Datamodel
 class Tweet(db.Model):
@@ -19,6 +19,8 @@ class Tweet(db.Model):
   source = db.StringProperty()
   profile_image_url = db.StringProperty()
   term = db.StringProperty(required=True)
+  users_count = db.IntegerProperty()
+  users_voted = db.StringListProperty()
 
 def unescape(text):
     def fixup(m):
@@ -144,9 +146,44 @@ class ImportHandler(webapp.RequestHandler):
         tw.put()
     self.response.out.write('success')
 
+class VoteHandler(webapp.RequestHandler):
+  def get(self):
+    logging.debug("Entering to vote...")
+    config = get_config()
+    vtweet = self.request.get('tweetid')
+    vuser = self.request.get('tweetlogin')
+    if vuser:
+      # Проверим не голосовал ли юзер за этот твит
+      try:
+        query = db.GqlQuery("SELECT * FROM Tweet WHERE id=:1", int(vtweet))
+        if query:
+          tweet = query[0]
+        else:
+          self.response.out.write('error_tweet_not_found')
+          return
+      except:
+        self.response.out.write('error_query_exception %s' % vtweet)
+        return
+      if vuser in tweet.users_voted:
+        self.response.out.write('already')
+      else:
+        # Добавляем данные о голосовании
+        tweet.users_voted.append(vuser)
+        if tweet.users_count:
+          tweet.users_count += 1
+        else:
+          tweet.users_count = 1
+        try:
+          tweet.put()
+          self.response.out.write('success')
+        except:
+          self.response.out.write('error2')
+    else:
+      self.response.out.write('error1')
 
 def main():
-  application = webapp.WSGIApplication([('/', IndexHandler), ('/rss', RssHandler), ('/import', ImportHandler)], debug=True)
+  logging.getLogger().setLevel(logging.DEBUG)
+  application = webapp.WSGIApplication([('/', IndexHandler), ('/rss', RssHandler), ('/import', ImportHandler), ('/vote', VoteHandler)], debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__': main()

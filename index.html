@@ -3,7 +3,18 @@
     <title>{{ config.site_name }} - {{ config.site_tag_line }}</title>
     <link rel="alternate" type="application/rss+xml" title="RSS Feeds" href="/rss" />
     <link rel="stylesheet" type="text/css" href="/resources/style.css" />
+	<script type="text/javascript" src="/resources/jquery.js"></script>
     <link rel="icon" type="image/ico" href="/favicon.ico">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script>
+	  function Vote(user, id){
+        $.get("/vote", { tweetlogin: user, tweetid: id },
+          function(data){
+            if(data=='success') { alert("Спасибо, Ваш голос учтён"); }
+            else if(data=='already') { alert("Вы уже голосовали за этот твит"); }
+          });
+	  }
+	</script>
   </head>
   <body>
     <div style="display:none;"><h1>{{ config.site_name }}</h1><h2>{{ config.tag_line }}</h2></div>
@@ -24,7 +35,7 @@
           </div>
           <div class="meta">
             <a href="http://twitter.com/{{ tweet.from_user|urlencode }}/statuses/{{ tweet.id|urlencode }}">{{ tweet.status.relative_created_at }}</a>
-            из {{ tweet.source }}
+            из {{ tweet.source }} нравится <a href="javascript:void()" onclick="Vote('user', {{ tweet.id }});"><img src="/resources/vote2.png"/></a>
           </div>
           <div class="clearleft"></div>
         </div>
