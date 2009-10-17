@@ -2,8 +2,6 @@
 *pyc
 *.swp
 config.yaml
-<<<<<<< HEAD:.gitignore
 today*
-=======
 *.kpf
->>>>>>> 247907d5531c36f853d084bacd5eaa52977170b4:.gitignore
+twitter_oauth_handler.py

@@ -1,1 +1,11 @@
 Refer to http://www.refresh.dk/TwitterEngine for installation instructions.
+
+for OAuth on appspot cange 
+twitter_oauth_handler.py.sample
+to
+twitter_oauth_handler.py
+and modify 
+    'consumer_key': '',
+    'consumer_secret': '',
+
+login on localhost is realized with standart google.user library
