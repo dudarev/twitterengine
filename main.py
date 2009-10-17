@@ -7,6 +7,9 @@ import twitter, os, random
 import re, htmlentitydefs
 import yaml  
 
+import users
+from twitter_oauth_handler import OAuthClient,OAuthHandler
+
 # Datamodel
 class Tweet(db.Model):
   id = db.IntegerProperty()
@@ -79,10 +82,17 @@ class IndexHandler(webapp.RequestHandler):
       if cloud_items[tw.from_user]>max: max = cloud_items[tw.from_user]
     for k in cloud_items:
       cloud.append({'name':k, 'lower_name':k.lower(), 'count':cloud_items[k], 'html':'<a href="http://twitter.com/%s" style="font-size:%spx">%s</a>' % (k, (9 + 16*(1.0*cloud_items[k]/max)), k)})
-      
+
+    user = users.get_current_user(self)
+    if user:
+      login_logout_link = "<strong>%s</strong> | <a href=\"%s\">Logout</a>" % (user,users.create_logout_url(self,"/"))
+    else:
+      login_logout_link = "<a href=\"%s\">Login</a>" % users.create_login_url(self,"/")
+    nav_link = login_logout_link
       
     path = os.path.join(os.path.dirname(__file__), 'index.html')
     self.response.out.write(template.render(path, locals()))
+    logging.debug('Start guestbook signing request')
 
 
 class RssHandler(webapp.RequestHandler):
@@ -146,7 +156,13 @@ class ImportHandler(webapp.RequestHandler):
 
 
 def main():
-  application = webapp.WSGIApplication([('/', IndexHandler), ('/rss', RssHandler), ('/import', ImportHandler)], debug=True)
+  logging.getLogger().setLevel(logging.DEBUG)
+  application = webapp.WSGIApplication([
+      ('/', IndexHandler), 
+      ('/rss', RssHandler), 
+      ('/import', ImportHandler),
+      ('/oauth/(.*)/(.*)', OAuthHandler),
+      ], debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__': main()
