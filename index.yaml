@@ -17,7 +17,7 @@ indexes:
   - name: id
     direction: desc
 
-# Used 12 times in query history.
+# Used 16 times in query history.
 - kind: Tweet
   properties:
   - name: votes_count

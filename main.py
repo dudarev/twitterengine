@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 import wsgiref.handlers
 import logging
@@ -56,20 +57,27 @@ def get_config():
 
 
 class IndexHandler(webapp.RequestHandler):
-  sort_order = "-id"
   show_votes = False
+  sort_by_votes = False
   def get(self):
     config = get_config()
 
     # Tweets
-    count = Tweet.all().count(1000)
+    if self.sort_by_votes:
+        count = Tweet.all().filter("votes_count >",0).count(1000)
+    else:
+        count = Tweet.all().count(1000)
     page = int(self.request.get('page', 1))
     prev_page = page-1
     next_page = page+1
     show_prev_page = (page>1)
     show_next_page = (page*20<count)
     tweets = []
-    for tweet in Tweet.all().order(self.sort_order).order("-id").fetch(20, (page-1)*20):
+    if self.sort_by_votes:
+        query = Tweet.all().filter("votes_count >",0).order("-votes_count").order("-id").fetch(20, (page-1)*20)
+    else:
+        query = Tweet.all().order("-id").fetch(20, (page-1)*20)
+    for tweet in query:
       tweet.status = twitter.Status(id=tweet.id, created_at=tweet.created_at)
       tweet.text = unescape(tweet.text)
       tweet.source = unescape(tweet.source)
@@ -97,11 +105,10 @@ class IndexHandler(webapp.RequestHandler):
       
     path = os.path.join(os.path.dirname(__file__), 'index.html')
     self.response.out.write(template.render(path, locals()))
-    logging.debug('Start guestbook signing request')
 
 class TopHandler(IndexHandler):
-  sort_order = "-votes_count"
   show_votes = True
+  sort_by_votes = True
 
 
 class RssHandler(webapp.RequestHandler):
@@ -167,9 +174,11 @@ class VoteHandler(webapp.RequestHandler):
   def get(self):
     config = get_config()
     vtweet = self.request.get('tweetid')
-    vuser = str(users.get_current_user(self))
+    logging.debug(users.get_current_user(self))
+    vuser = users.get_current_user(self)
     if vuser:
-      # Проверим не голосовал ли юзер за этот твит
+      vuser = str(vuser)
+      # Check if user voted for this tweet
       try:
         query = db.GqlQuery("SELECT * FROM Tweet WHERE id=:1", int(vtweet))
         if query:
@@ -183,7 +192,7 @@ class VoteHandler(webapp.RequestHandler):
       if vuser in tweet.users_voted:
         self.response.out.write('already')
       else:
-        # Добавляем данные о голосовании
+        # Add data about the vote
         tweet.users_voted.append(vuser)
         if tweet.votes_count:
           tweet.votes_count += 1
