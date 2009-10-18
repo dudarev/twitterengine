@@ -7,11 +7,20 @@
     <link rel="icon" type="image/ico" href="/favicon.ico">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<script>
-	  function Vote(user, id){
-        $.get("/vote", { tweetlogin: user, tweetid: id },
+	  function Vote(id){
+        $.get("/vote", { tweetid: id },
           function(data){
-            if(data=='success') { alert("Спасибо, Ваш голос учтён"); }
-            else if(data=='already') { alert("Вы уже голосовали за этот твит"); }
+              if(data=='success') { 
+                  alert("Спасибо, Ваш голос учтён");
+                  $("#vote_img"+id).attr("src","/resources/vote2.png");
+              }
+              else if(data=='already') { 
+                  alert("Вы уже голосовали за этот твит"); 
+                  $("#vote_img"+id).attr("src","/resources/vote2.png");
+              }
+              else if(data=='no login') { 
+                  alert("Чтобы голосовать, залогиньтесь через OAuth"); 
+              }
           });
 	  }
 	</script>
@@ -26,8 +35,11 @@
       <div id="sidebar">
         <h3>Что это?</h3>
         <p>Агрегатор твиттов украинских политиков и того, что им и о них пишут.</p>
-        <h3>Зачем?</h3>
-        <p>Это первый пробный проект в формате "codejam" под эгидой донецкого "<a href="http://groups.google.com/group/cnc-donetsk/">кофе-и-кода</a>".</p>
+        <p>Смотрите подборку твитов </p>
+        <p>
+            <a href="/top">по голосам</a><br/>
+            <a href="/">по времени</a><br/>
+        </p>
       </div>
       <div id="content">
         {% for tweet in tweets %}
@@ -37,16 +49,22 @@
             <a href="http://twitter.com/{{ tweet.from_user|urlencode }}" class="userlink">{{ tweet.from_user|escape }}:</a> {{ tweet.text|escape|urlize }}
           </div>
           <div class="meta">
-            <a href="http://twitter.com/{{ tweet.from_user|urlencode }}/statuses/{{ tweet.id|urlencode }}">{{ tweet.status.relative_created_at }}</a>
-            из {{ tweet.source }} нравится <a href="javascript:void()" onclick="Vote('user', {{ tweet.id }});"><img src="/resources/vote2.png"/></a>
+              <span class="when"><a href="http://twitter.com/{{ tweet.from_user|urlencode }}/statuses/{{ tweet.id|urlencode }}">{{ tweet.status.relative_created_at }}</a>
+                  из {{ tweet.source }}</span>
+              <span class="vote">
+              {% if self.show_votes %} {% if tweet.votes_count %} {{tweet.votes_count}} {%endif%} {%else%}
+              {%if forloop.first%}твит нравится? → {%endif%}
+              {%endif%}
+              </span>
+              <a class="vote_button" href="javascript:void()" onclick="Vote({{ tweet.id }});"><img id="vote_img{{tweet.id}}" src="/resources/vote.png"/></a>
           </div>
           <div class="clearleft"></div>
         </div>
         {% endfor %}
 
         <div class="paging">
-          {% if show_prev_page %}<a href="/?page={{ prev_page }}">&laquo; Предыдущие 20</a>{% endif %}
-          {% if show_next_page %}<a href="/?page={{ next_page }}">Следующие 20 &raquo;</a>{% endif %}
+          {% if show_prev_page %}<a href="?page={{ prev_page }}">&laquo; Предыдущие 20</a>{% endif %}
+          {% if show_next_page %}<a href="?page={{ next_page }}">Следующие 20 &raquo;</a>{% endif %}
         </div>
       </div>
       <div id="footer">
@@ -58,6 +76,7 @@
             </td>
             <td width="50%" valign="top">
               <h3>Как?</h3>
+              <p>Это первый пробный проект в формате "codejam" под эгидой донецкого "<a href="http://groups.google.com/group/cnc-donetsk/">кофе-и-кода</a>".</p>
               <p>За основу взят <a href="http://github.com/steffentchr/twitterengine">код</a> аналогичного датского проекта <a href="http://www.folketwinget.dk/">http://www.folketwinget.dk/</a>. <a href="http://github.com/dudarev/twitterengine">Код изменений</a> тоже открыт.</p>
             </td>
           </tr>

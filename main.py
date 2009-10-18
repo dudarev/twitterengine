@@ -6,6 +6,7 @@ from google.appengine.ext.webapp import template
 import twitter, os, random
 import re, htmlentitydefs
 import yaml
+import sys
 
 import users
 from twitter_oauth_handler import OAuthClient,OAuthHandler
@@ -22,7 +23,7 @@ class Tweet(db.Model):
   source = db.StringProperty()
   profile_image_url = db.StringProperty()
   term = db.StringProperty(required=True)
-  users_count = db.IntegerProperty()
+  votes_count = db.IntegerProperty()
   users_voted = db.StringListProperty()
 
 def unescape(text):
@@ -55,6 +56,8 @@ def get_config():
 
 
 class IndexHandler(webapp.RequestHandler):
+  sort_order = "-id"
+  show_votes = False
   def get(self):
     config = get_config()
 
@@ -66,7 +69,7 @@ class IndexHandler(webapp.RequestHandler):
     show_prev_page = (page>1)
     show_next_page = (page*20<count)
     tweets = []
-    for tweet in Tweet.all().order('-id').fetch(20, (page-1)*20):
+    for tweet in Tweet.all().order(self.sort_order).order("-id").fetch(20, (page-1)*20):
       tweet.status = twitter.Status(id=tweet.id, created_at=tweet.created_at)
       tweet.text = unescape(tweet.text)
       tweet.source = unescape(tweet.source)
@@ -95,6 +98,10 @@ class IndexHandler(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), 'index.html')
     self.response.out.write(template.render(path, locals()))
     logging.debug('Start guestbook signing request')
+
+class TopHandler(IndexHandler):
+  sort_order = "-votes_count"
+  show_votes = True
 
 
 class RssHandler(webapp.RequestHandler):
@@ -160,7 +167,7 @@ class VoteHandler(webapp.RequestHandler):
   def get(self):
     config = get_config()
     vtweet = self.request.get('tweetid')
-    vuser = self.request.get('tweetlogin')
+    vuser = str(users.get_current_user(self))
     if vuser:
       # Проверим не голосовал ли юзер за этот твит
       try:
@@ -178,22 +185,23 @@ class VoteHandler(webapp.RequestHandler):
       else:
         # Добавляем данные о голосовании
         tweet.users_voted.append(vuser)
-        if tweet.users_count:
-          tweet.users_count += 1
+        if tweet.votes_count:
+          tweet.votes_count += 1
         else:
-          tweet.users_count = 1
+          tweet.votes_count = 1
         try:
           tweet.put()
           self.response.out.write('success')
         except:
-          self.response.out.write('error2')
+          self.response.out.write(str(tweet.users_voted))
     else:
-      self.response.out.write('error1')
+      self.response.out.write('no login')
 
 def main():
   logging.getLogger().setLevel(logging.DEBUG)
   application = webapp.WSGIApplication([
       ('/', IndexHandler), 
+      ('/top', TopHandler),
       ('/rss', RssHandler), 
       ('/import', ImportHandler),
       ('/vote', VoteHandler),
