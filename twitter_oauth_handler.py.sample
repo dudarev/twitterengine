@@ -156,9 +156,12 @@ class OAuthClient(object):
         if self.token is None:
             self.token = OAuthAccessToken.get_by_key_name(self.get_cookie())
 
-        fetch = urlfetch(self.get_signed_url(
-            api_method, self.token, http_method, **extra_params
-            ))
+        try:
+            fetch = urlfetch(self.get_signed_url(
+                api_method, self.token, http_method, **extra_params
+                ))
+        except:
+            return None
 
         if fetch.status_code not in expected_status:
             return None
@@ -194,11 +197,11 @@ class OAuthClient(object):
 
     def login(self):
 
-        proxy_id = self.get_cookie()
+        self.expire_cookie()
 
-        if proxy_id:
-            return "FOO%rFF" % proxy_id
-            self.expire_cookie()
+        # proxy_id = self.get_cookie()
+        # if proxy_id:
+        #    return "FOO%rFF" % proxy_id
 
         return self.get_request_token()
 
@@ -355,7 +358,8 @@ class OAuthHandler(RequestHandler):
         if action in client.__public__:
             self.response.out.write(getattr(client, action)())
         else:
-            self.response.out.write(client.login())
+            self.redirect('/oauth/twitter/login')
+            # self.response.out.write(client.login())
 
 # ------------------------------------------------------------------------------
 # modify this demo MainHandler to suit your needs
