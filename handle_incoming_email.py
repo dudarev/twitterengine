@@ -12,8 +12,6 @@ from google.appengine.ext import webapp, db
 class Email(db.Model):
     subject = db.StringProperty()
     sender = db.EmailProperty()
-    to = db.StringListProperty()
-    cc = db.StringListProperty()
     body = db.TextProperty()
 
 class MailHandler(InboundMailHandler):
