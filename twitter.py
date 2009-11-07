@@ -1391,6 +1391,17 @@ class Api(object):
     if self._request_headers and 'Authorization' in self._request_headers:
       del self._request_headers['Authorization']
 
+  def _GetOpener(self, url, username=None, password=None):
+    if username and password:
+      self._AddAuthorizationHeader(username, password)
+      handler = self._urllib.HTTPBasicAuthHandler()
+      (scheme, netloc, path, params, query, fragment) = urlparse.urlparse(url)
+      handler.add_password(Api._API_REALM, netloc, username, password)
+      opener = self._urllib.build_opener(handler)
+    else:
+      opener = self._urllib.build_opener()
+    opener.addheaders = self._request_headers.items()
+    return opener
 
   def _Encode(self, s):
     if self._input_encoding:
@@ -1454,6 +1465,10 @@ class Api(object):
     """
     # Add key/value parameters to the query string of the url
     url = self._BuildUrl(url, extra_params=parameters)
+
+    # Get a url opener that can handle basic auth
+    opener = self._GetOpener(url, username=self._username, password=self._password)
+
     encoded_post_data = self._EncodePostData(post_data)
     result = urlfetch.fetch(url, payload=encoded_post_data, method=post_data and urlfetch.POST or urlfetch.GET, headers=self._request_headers)
     return result.content
