@@ -26,6 +26,7 @@ class Tweet(db.Model):
   term = db.StringProperty(required=True)
   votes_count = db.IntegerProperty()
   users_voted = db.StringListProperty()
+  is_retweeted = db.BooleanProperty(default=False)
 
 def unescape(text):
     def fixup(m):
@@ -154,20 +155,21 @@ class ImportHandler(webapp.RequestHandler):
       statuses = api.Search(terms=term, since_id=since_id)
 
       for status in statuses:
-        tw = Tweet.get_or_insert("id%s" % status.id, 
-                                 id=status.id, 
-                                 text=status.text, 
-                                 created_at=status.created_at, 
-                                 to_user=status.to_user, 
-                                 to_user_id=status.to_user_id, 
-                                 from_user=status.from_user, 
-                                 from_user_id=status.from_user_id, 
-                                 source=status.source, 
-                                 profile_image_url=status.profile_image_url, 
-                                 term=term);
-        # (this tweet might have been a match for a different query than before, update datastore)
-        tw.term = term
-        tw.put()
+        if not status.from_user == "ukropol":
+          tw = Tweet.get_or_insert("id%s" % status.id, 
+                                   id=status.id, 
+                                   text=status.text, 
+                                   created_at=status.created_at, 
+                                   to_user=status.to_user, 
+                                   to_user_id=status.to_user_id, 
+                                   from_user=status.from_user, 
+                                   from_user_id=status.from_user_id, 
+                                   source=status.source, 
+                                   profile_image_url=status.profile_image_url, 
+                                   term=term);
+          # (this tweet might have been a match for a different query than before, update datastore)
+          tw.term = term
+          tw.put()
     self.response.out.write('success')
 
 class VoteHandler(webapp.RequestHandler):
@@ -198,6 +200,14 @@ class VoteHandler(webapp.RequestHandler):
           tweet.votes_count += 1
         else:
           tweet.votes_count = 1
+        # retweet it if not retweeted before
+        if not tweet.is_retweeted:
+          config = get_config()
+          api = twitter.Api(username=config["twitter_username"], password=config["twitter_password"])
+          retweet_text = "RT @%s %s" % (tweet.from_user, tweet.text)
+          if len(retweet_text) > 140:
+            retweet_text = retweet_text[:135] + "..."
+          res = api.PostUpdate(retweet_text)
         try:
           tweet.put()
           self.response.out.write('success')
