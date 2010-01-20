@@ -8,9 +8,11 @@ twitter_password: password
 users:
 - president_ua
 - bogoslovska
-- arseniy2010
+- Arseniy2010
 - tymoshenko
 - SergeyTigipko
+- Petr_Symonenko
+- Yanukovich_2010
 
 hashes:
 - non_existant_hash
